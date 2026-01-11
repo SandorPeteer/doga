@@ -1,0 +1,535 @@
+<!DOCTYPE html>
+<html lang="hu">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Python Programozási Teszt</title>
+
+    <!-- EmailJS -->
+    <script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
+    <script>
+        (function () {
+            emailjs.init("cesxNZpDSC16dOY2u");
+        })();
+    </script>
+
+    <!-- CodeMirror for Python syntax highlighting -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.2/codemirror.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.2/theme/monokai.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.2/codemirror.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.2/mode/python/python.min.js"></script>
+
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 2rem 0;
+        }
+
+        .container {
+            background: white;
+            padding: 3rem;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            max-width: 900px;
+            width: 90%;
+            margin: 0 auto;
+            overflow-y: visible;
+        }
+
+        /* Fullscreen adjustments */
+        html:fullscreen,
+        html:-webkit-full-screen,
+        html:-moz-full-screen,
+        html:-ms-fullscreen {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            height: 100%;
+            overflow-y: auto;
+        }
+
+        body:fullscreen,
+        body:-webkit-full-screen,
+        body:-moz-full-screen,
+        body:-ms-fullscreen {
+            height: 100%;
+            overflow-y: auto;
+        }
+
+        body:fullscreen .container,
+        body:-webkit-full-screen .container,
+        body:-moz-full-screen .container,
+        body:-ms-fullscreen .container {
+            max-width: 95vw;
+            max-height: 90vh;
+            width: 95vw;
+            overflow-y: auto;
+            margin: 2rem auto;
+        }
+
+        h1 {
+            text-align: center;
+            color: #333;
+            margin-bottom: 2rem;
+            font-size: 2rem;
+        }
+
+        .hidden {
+            display: none !important;
+        }
+
+        /* Start Section */
+        #start-section {
+            display: flex;
+            flex-direction: column;
+            gap: 1.5rem;
+        }
+
+        .test-info {
+            background: #f8f9fa;
+            padding: 1.5rem;
+            border-radius: 10px;
+            border-left: 4px solid #667eea;
+            margin-bottom: 1rem;
+        }
+
+        .test-info h2 {
+            color: #667eea;
+            font-size: 1.4rem;
+            margin-bottom: 1rem;
+        }
+
+        .test-info p {
+            color: #555;
+            line-height: 1.8;
+            margin-bottom: 0.8rem;
+        }
+
+        .test-info ul {
+            margin-left: 1.5rem;
+            color: #555;
+            line-height: 1.8;
+        }
+
+        .test-info ul li {
+            margin-bottom: 0.5rem;
+        }
+
+        .warning-box {
+            background: #fff3cd;
+            border: 2px solid #ffc107;
+            padding: 1rem;
+            border-radius: 8px;
+            margin-top: 1rem;
+        }
+
+        .warning-box strong {
+            color: #e74c3c;
+            font-size: 1.1rem;
+        }
+
+        .warning-box p {
+            color: #856404;
+            margin-top: 0.5rem;
+            line-height: 1.6;
+        }
+
+        .form-group {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+
+        .form-group label {
+            font-weight: 600;
+            color: #555;
+            font-size: 1.1rem;
+        }
+
+        .form-group input {
+            padding: 0.8rem;
+            border: 2px solid #ddd;
+            border-radius: 8px;
+            font-size: 1rem;
+            transition: border-color 0.3s;
+        }
+
+        .form-group input:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        .btn {
+            padding: 1rem 2rem;
+            font-size: 1.2rem;
+            font-weight: 600;
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.3s;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(102, 126, 234, 0.4);
+        }
+
+        .btn-primary:active {
+            transform: translateY(0);
+        }
+
+        .btn-secondary {
+            background: #f39c12;
+            color: white;
+        }
+
+        .btn-secondary:hover {
+            background: #e67e22;
+        }
+
+        .btn-success {
+            background: #27ae60;
+            color: white;
+        }
+
+        .btn-success:hover {
+            background: #229954;
+        }
+
+        .btn-danger {
+            background: #e74c3c;
+            color: white;
+        }
+
+        .btn-danger:hover {
+            background: #c0392b;
+        }
+
+        /* Quiz Section */
+        #quiz-section {
+            display: none;
+            flex-direction: column;
+            gap: 1.5rem;
+        }
+
+        #quiz-section:not(.hidden) {
+            display: flex !important;
+        }
+
+        .timer-container {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: #f8f9fa;
+            padding: 1rem;
+            border-radius: 10px;
+            margin-bottom: 1rem;
+        }
+
+        .timer {
+            font-size: 1.3rem;
+            font-weight: 700;
+            color: #333;
+        }
+
+        .timer.warning {
+            color: #e74c3c;
+            animation: pulse 1s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+
+        .task-info {
+            background: #e8f4f8;
+            padding: 1rem;
+            border-radius: 10px;
+            margin-bottom: 1rem;
+            border-left: 4px solid #667eea;
+        }
+
+        .task-number {
+            font-weight: 700;
+            color: #667eea;
+            font-size: 1.2rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .task-description {
+            color: #555;
+            line-height: 1.6;
+            margin-bottom: 1rem;
+            white-space: pre-wrap;
+        }
+
+        .task-example {
+            background: #2d2d2d;
+            color: #f8f8f2;
+            padding: 1rem;
+            border-radius: 8px;
+            font-family: 'Courier New', monospace;
+            font-size: 0.9rem;
+            white-space: pre-wrap;
+            margin-top: 0.5rem;
+            border: 2px solid #444;
+        }
+
+        .code-label {
+            font-weight: 600;
+            color: #555;
+            margin-bottom: 0.5rem;
+            margin-top: 1rem;
+        }
+
+        .CodeMirror {
+            border: 2px solid #ddd;
+            border-radius: 8px;
+            height: 300px;
+            font-size: 1rem;
+        }
+
+        .button-group {
+            display: flex;
+            gap: 1rem;
+            justify-content: space-between;
+            margin-top: 1rem;
+        }
+
+        .task-navigation {
+            display: flex;
+            gap: 1rem;
+            justify-content: center;
+            margin-top: 1rem;
+        }
+
+        .task-nav-btn {
+            padding: 0.5rem 1rem;
+            background: #95a5a6;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 0.9rem;
+        }
+
+        .task-nav-btn:hover {
+            background: #7f8c8d;
+        }
+
+        .task-nav-btn.active {
+            background: #667eea;
+        }
+
+        .task-nav-btn.completed {
+            background: #27ae60;
+        }
+
+        /* End Section */
+        #end-section {
+            display: none;
+            flex-direction: column;
+            gap: 2rem;
+            text-align: center;
+        }
+
+        #end-section h2 {
+            color: #27ae60;
+            font-size: 1.8rem;
+        }
+
+        .info-text {
+            color: #666;
+            font-size: 1.1rem;
+            line-height: 1.6;
+        }
+
+        /* Modal */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.7);
+            z-index: 9999;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .modal-content {
+            background: white;
+            padding: 2rem;
+            border-radius: 15px;
+            max-width: 500px;
+            width: 90%;
+            text-align: center;
+        }
+
+        .modal-content h3 {
+            color: #333;
+            margin-bottom: 1rem;
+            font-size: 1.5rem;
+        }
+
+        .modal-content p {
+            color: #666;
+            margin-bottom: 2rem;
+            line-height: 1.6;
+        }
+
+        .modal-buttons {
+            display: flex;
+            gap: 1rem;
+            justify-content: center;
+        }
+
+        /* Fullscreen message */
+        #fullscreen-prompt {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.95);
+            display: none;
+            justify-content: center;
+            align-items: center;
+            z-index: 10000;
+            color: white;
+            font-size: 2rem;
+            text-align: center;
+            padding: 2rem;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <h1>🐍 Python Programozási Teszt</h1>
+
+        <!-- Start Section -->
+        <div id="start-section">
+            <!-- Test Information -->
+            <div class="test-info">
+                <h2>📋 A tesztről</h2>
+                <p>
+                    Ez egy Python programozási dolgozat, amely 8 pontos feladatokból áll.
+                    A tesztelés során 3 véletlenszerűen kiválasztott feladatot kell megoldanod.
+                </p>
+                <p><strong>Időkeret:</strong></p>
+                <ul>
+                    <li>Feladatonként 8 perc áll rendelkezésedre</li>
+                    <li>Összesen 24 perc a teljes tesztre</li>
+                    <li>Szabadon gazdálkodhatsz az időddel a 3 feladat között</li>
+                </ul>
+                <p><strong>Funkciók:</strong></p>
+                <ul>
+                    <li>Feladatok között szabadon válthatsz</li>
+                    <li>"Skip" gombbal átugorhatod a feladatot és később visszatérhetsz rá</li>
+                    <li>Python syntax highlighting segíti a kódírást</li>
+                    <li>A válaszaid automatikusan mentésre kerülnek</li>
+                </ul>
+            </div>
+
+            <!-- Warning Box -->
+            <div class="warning-box">
+                <strong>⚠️ FONTOS SZABÁLYOK - EZEK MEGSZEGÉSE ELÉGTELEN OSZTÁLYZATOT EREDMÉNYEZ!</strong>
+                <p>
+                    ❌ <strong>TILOS</strong> az ablakból kikattintani vagy másik fülre váltani<br>
+                    ❌ <strong>TILOS</strong> kilépni a fullscreen módból<br>
+                    ❌ <strong>TILOS</strong> megnyitni a Developer Tools-t (F12, Ctrl+Shift+I)<br>
+                    ❌ <strong>TILOS</strong> az oldal kódjának módosítása<br>
+                    <br>
+                    ✅ Ezen szabályok bármelyikének megszegése esetén a teszt azonnal véget ér és elégtelen osztályzatot kapsz!
+                </p>
+            </div>
+
+            <!-- Form -->
+            <div class="form-group">
+                <label for="name">Név:</label>
+                <input type="text" id="name" placeholder="Add meg a neved">
+            </div>
+            <div class="form-group">
+                <label for="email">Email cím:</label>
+                <input type="email" id="email" placeholder="Add meg az email címed">
+            </div>
+            <div class="form-group">
+                <label for="class">Osztály:</label>
+                <input type="text" id="class" placeholder="Add meg az osztályod (pl. 9.A)">
+            </div>
+            <button class="btn btn-primary" id="start-btn">Teszt Indítása - Elfogadom a szabályokat</button>
+        </div>
+
+        <!-- Quiz Section -->
+        <div id="quiz-section" class="hidden">
+            <div class="timer-container">
+                <div class="timer" id="global-timer">Össz-idő: 24:00</div>
+                <div class="timer" id="task-timer">Feladat idő: 8:00</div>
+            </div>
+
+            <div class="task-info">
+                <div class="task-number" id="task-number"></div>
+                <div class="task-description" id="task-description"></div>
+                <div class="task-example" id="task-example"></div>
+            </div>
+
+            <div class="code-label">📝 Írd be a Python kódod:</div>
+            <textarea id="code-editor"></textarea>
+
+            <div class="button-group">
+                <button class="btn btn-secondary" id="skip-btn">Feladat átugrása</button>
+                <button class="btn btn-success" id="submit-btn">Teszt beadása</button>
+            </div>
+
+            <div class="task-navigation" id="task-navigation"></div>
+        </div>
+
+        <!-- End Section -->
+        <div id="end-section" class="hidden">
+            <h2>✅ Teszt befejezve!</h2>
+            <p class="info-text">Köszönjük, hogy kitöltötted a tesztet! A válaszaidat elküldtük a tanárnak.</p>
+            <p class="info-text" id="final-time"></p>
+        </div>
+    </div>
+
+    <!-- Confirmation Modal -->
+    <div class="modal" id="submit-modal">
+        <div class="modal-content">
+            <h3>⚠️ Biztos vagy benne?</h3>
+            <p>Biztosan be szeretnéd adni a tesztet? A beadás után már nem tudsz változtatni a válaszaidon!</p>
+            <div class="modal-buttons">
+                <button class="btn btn-danger" id="confirm-submit">Igen, beadom</button>
+                <button class="btn btn-secondary" id="cancel-submit">Mégse</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Fullscreen Prompt -->
+    <div id="fullscreen-prompt">
+        <div>
+            <h2>⚠️ Fullscreen mód szükséges!</h2>
+            <p style="font-size: 1.2rem; margin-top: 1rem;">A teszt folytatásához maradj fullscreen módban.</p>
+        </div>
+    </div>
+
+    <script src="python_teszt.obfuscated.js"></script>
+</body>
+
+</html>
