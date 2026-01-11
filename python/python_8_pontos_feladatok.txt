@@ -1,0 +1,254 @@
+1. feladat
+
+Írj programot, amelyben bekérsz a felhasználótól két egész számot, majd a program döntse el, hogy melyik a nagyobb.
+Ha a két szám egyenlő, írja ki, hogy: A két szám egyenlő!
+
+Minta kód:
+
+```
+Add meg az első számot: 5
+Add meg a második számot: 8
+A nagyobb szám: 8
+
+```
+
+2. feladat
+
+Írj programot, ahol véletlenszám generálással játszon a gép és a játékos. 
+A játékos és a gép is dobjon a dobókockával 1-6-ig, ezt jelenítse meg a program, majd utána írja ki, hogy ki nyert.
+Ha a játékos nyert írja ki, hogy: A játékos nyert!
+Ha a gép nyert, írja ki, hogy: A gép nyert!
+Amennyiben az eredmény döntetlen, írja ki: Döntetlen!
+
+Minta kód:
+
+```
+A játékos dobása: 4
+A gép dobása: 1
+A játékos nyert!
+
+A játékos dobása: 2
+A gép dobása: 6
+A gép nyert!
+
+A játékos dobása: 3
+A gép dobása: 3
+Döntetlen!
+
+```
+
+3. feladat
+
+Készíts egy programot, amely bekéri a felhasználó nevét és életkorát, majd a kapott adatok alapján kiszámítja a mozijegyének árát.
+A teljes árú jegy 3000 Ft-ba kerül. 14 éves kor és az alatt, gyereknek számít a néző és 50%-os kedvezményt kap a jegy árából.
+A program döntse el, hogy a néző gyerek- vagy felnőttjegyet kap, majd írja ki a fizetendő összeget.
+
+Minta kód:
+
+```
+Add meg a neved: Réka
+Add meg a korodat: 44
+Felnőtt jegyet kapsz.
+Réka a jegyed ára: 3000 Ft
+
+Add meg a neved: Marci
+Add meg a korodat: 13
+Gyerek jegyet kapsz.
+Marci a jegyed ára: 1500 Ft
+
+```
+
+4. feladat
+
+Készíts egy programot, amely köszön a felhasználónak a napszaknak megfelelően.
+Kérd be a nevét és azt, hogy hány óra van (egész óra).
+10 óra előtt: Jó reggelt, 10 és 18 óra között: Jó napot, 18 óra után Jó estét, köszönjön a program a felhasználónak, a nevén szólítva!
+
+Minta kód:
+
+```
+Add meg a neved: Réka
+Hány óra van? 14
+Jó napot, Réka!
+
+```
+
+5. feladat
+
+Hozz létre egy programot, amely bekéri a felhasználótól, hogy mennyi a jelenlegi testhőmérséklete, majd visszajelez neki, hogy mi történik vele és mit javasolsz, ha gond van.
+Testhőmérsékletek:
+36-tól kisebb - kihűlés (takarózzon be, legyen meleg helyen, igyon meleg italt)
+36 - 37-ig - normál testhőmérséklet (jól van, minden rendben)
+37,1 - 38-ig - hőemelkedés (pihenjen, igyon folyadékot)
+38,1 - 39,5 - láz (feküdjön le, vegyen be gyógyszert, pihenjen, igyon folyadékot)
+39,6-tól több - nagyon magas láz (azonnal orvosi segítségre van szüksége)
+
+Minta kód:
+
+```
+Add meg a testhőmérsékleted (°C): 38.6
+Lázas vagy. Vegyél be gyógyszert, igyál sok folyadékot, pihenj sokat.
+Add meg a testhőmérsékleted (°C): 39.8
+Nagyon magas lázad van, fordulj orvoshoz!
+Add meg a testhőmérsékleted (°C): 35.8
+Kihűltél, takarózz be, igyál meleg teát.
+
+```
+
+6. feladat
+
+Készíts egy programot, amiben bekérsz egy egész számot. Ez egy torony magassága lesz, méterben meghatározva.
+Ha a torony alacsonyabb, mint 30 méter, akkor írd ki, hogy "A torony alacsony.".
+Ha magasabb, mint 100 méter, akkor írd ki, hogy "A torony magas."
+Ha 30 és 100 méter között van (beleértve a határértékeket is), akkor írd ki, hogy "A torony megfelelő magasságú."!
+
+Minta kód:
+
+```
+A torony magassága (m): 15
+A torony alacsony.
+
+A torony magassága (m): 120
+A torony magas.
+
+A torony magassága (m): 72
+A torony megfelelő magasságú.
+
+```
+
+7. feladat
+
+Egy bolt pontban reggel 8 órakor nyit, és pontban délután 16 órakor zár be – azaz 8:00-kor már nyitva van és 16:00-kor már nincs nyitva.
+Írj programot, amelyben bekérsz egy egész órát jelző számot a felhasználótól, majd írja ki a program, hogy a megadott időpontban nyitva van-e a bolt!
+Amennyiben igen, akkor azt is írja ki, hogy mennyi idő van még zárásig, azaz hány egész óra áll rendelkezésre odaérni a boltba!
+A program üzeneteinek megfogalmazásában kövesd az alábbi példát!
+
+Minta kód:
+
+```
+Hány óra van most? 8
+A bolt nyitva van.
+Ennyi órád van még odaérni: 8
+
+Hány óra van most? 7
+A bolt zárva van.
+
+Hány óra van most? 17
+A bolt zárva van.
+
+Hány óra van most? 12
+A bolt nyitva van.
+Ennyi órád van még odaérni: 4
+
+```
+
+8. feladat
+
+Írj programot, amelyben bekérsz a felhasználótól a hónapoknak megfelelően egy számot 1-12 között, majd írja ki a program, hogy milyen évszak van!
+A program kezelje azon eseteket is amelyek a tartományon kívül esnek.
+
+Minta kód:
+
+```
+Add meg milyen hónap van (1-12): 0
+Nincs ilyen hónap!
+
+Add meg milyen hónap van (1-12): 3
+Tavasz van!
+
+Add meg milyen hónap van (1-12): 8
+Nyár van!
+
+Add meg milyen hónap van (1-12): 10
+Ősz van!
+
+Add meg milyen hónap van (1-12): 12
+Tél van!
+
+Add meg milyen hónap van (1-12): 13
+Nincs ilyen hónap!
+
+```
+
+9. feladat
+
+Írj programot, amelyben bekéred a felhasználó életkorát, majd írd ki, hogy gyermek (0-14 év), fiatal (15-24 év), felnőtt (25-64 év) vagy idős (65+ év) kategóriába tartozik.
+
+Minta kód:
+
+```
+Add meg az életkorod! 13
+Gyermek vagy.
+
+Add meg az életkorod! 18
+Fiatal vagy.
+
+Add meg az életkorod! 44
+Felnőtt vagy.
+
+Add meg az életkorod! 70
+Idős vagy.
+
+```
+
+10. feladat
+
+Írj programot, amelyben bekéred a felhasználó testsúlyát kilogramm-ban és magasságát méterben, majd számítsd ki és írd ki a BMI értékét két tizedesjegyre kerekítve!
+A BMI képlete: testsúly / (magasság * magasság)
+
+Minta kód:
+
+```
+Add meg a testsúlyod kg-ban! 75
+Add meg a magasságod méterben! 1.8
+A BMI értéked: 23.15
+
+```
+
+11. feladat
+
+Írj programot, amelyben bekérsz a felhasználótól 3 érdemjegyet 1 és 5 között, majd számíts átlagot két tizedesjegyre kerekítve, valamint írd ki azt, hogy megfelelt-e.
+(Megfelelt az átlag: 2.0 és afelett)! 
+Átlag számítás: az összes szám összeadása majd elosztása a számok darabszámával pl.: (5 + 4 + 3) / 3 
+
+Minta kód:
+
+```
+Add meg az 1. jegyet! 4
+Add meg a 2. jegyet! 5
+Add meg a 3. jegyet! 3
+Átlag: 4.0
+Megfelelt.
+
+Add meg az 1. jegyet! 1
+Add meg a 2. jegyet! 1
+Add meg a 3. jegyet! 2
+Átlag: 1.33
+Nem felelt meg.
+
+```
+
+12. feladat
+
+Írj programot, amely bekér a felhasználótól egy hőmérsékletet Celsius fokban, majd kiírja, hogy ezen a hőmérsékleten a víz milyen halmazállapotban van!
+(0°C alatt szilárd/jég, 0-100°C között folyékony/víz, 100°C felett légnemű/gőz).
+
+Minta kód:
+
+```
+Add meg a hőmérsékletet Celsius fokban! -5
+A víz halmazállapota: szilárd
+
+Add meg a hőmérsékletet Celsius fokban! 0
+A víz halmazállapota: folyékony
+
+Add meg a hőmérsékletet Celsius fokban! 25
+A víz halmazállapota: folyékony
+
+Add meg a hőmérsékletet Celsius fokban! 100
+A víz halmazállapota: folyékony
+
+Add meg a hőmérsékletet Celsius fokban! 150
+A víz halmazállapota: légnemű
+
+```
