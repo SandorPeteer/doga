@@ -20,6 +20,10 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.2/codemirror.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.2/mode/python/python.min.js"></script>
 
+    <!-- Skulpt for Python execution -->
+    <script src="https://skulpt.org/js/skulpt.min.js"></script>
+    <script src="https://skulpt.org/js/skulpt-stdlib.js"></script>
+
     <style>
         * {
             margin: 0;
@@ -304,6 +308,57 @@
             font-size: 1rem;
         }
 
+        .run-code-btn {
+            margin-top: 1rem;
+            padding: 0.8rem 1.5rem;
+            background: #2ecc71;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .run-code-btn:hover {
+            background: #27ae60;
+            transform: translateY(-2px);
+        }
+
+        .run-code-btn:active {
+            transform: translateY(0);
+        }
+
+        .output-container {
+            margin-top: 1rem;
+            display: none;
+        }
+
+        .output-label {
+            font-weight: 600;
+            color: #555;
+            margin-bottom: 0.5rem;
+        }
+
+        .output-box {
+            background: #2d2d2d;
+            color: #0f0;
+            padding: 1rem;
+            border-radius: 8px;
+            font-family: 'Courier New', monospace;
+            font-size: 0.9rem;
+            white-space: pre-wrap;
+            border: 2px solid #444;
+            min-height: 100px;
+            max-height: 200px;
+            overflow-y: auto;
+        }
+
+        .output-box.error {
+            color: #ff6b6b;
+        }
+
         .button-group {
             display: flex;
             gap: 1rem;
@@ -492,6 +547,13 @@
 
             <div class="code-label">📝 Írd be a Python kódod:</div>
             <textarea id="code-editor"></textarea>
+
+            <button class="run-code-btn" id="run-code-btn">▶ Kód futtatása</button>
+
+            <div class="output-container" id="output-container">
+                <div class="output-label">💻 Kimenet:</div>
+                <div class="output-box" id="output-box"></div>
+            </div>
 
             <div class="button-group">
                 <button class="btn btn-secondary" id="skip-btn">Feladat átugrása</button>
