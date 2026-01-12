@@ -554,3 +554,388 @@ builtins.input = _original_input
         }
     }
 }
+
+// Final override: handle multiple inputs without crashing on int('') by requesting sequentially.
+async function runPythonCode() {
+    const code = codeEditor.getValue();
+    const outputBox = document.getElementById("output-box");
+    const outputContainer = document.getElementById("output-container");
+
+    if (!code.trim()) {
+        outputContainer.style.display = "block";
+        outputBox.classList.remove("error");
+        outputBox.textContent = "Nincs futtatható kód!\nÍrj be Python kódot, majd nyomd meg a Futtatás gombot.";
+        return;
+    }
+
+    outputContainer.style.display = "block";
+    outputBox.textContent = "Futtatás...\n";
+    outputBox.classList.remove("error");
+
+    if (!pyodideReady) {
+        outputBox.textContent = "Python környezet betöltése...\n";
+        await initPyodide();
+        if (!pyodideReady) {
+            outputBox.classList.add("error");
+            outputBox.textContent = "Hiba: A Python környezet nem tölthető be!";
+            return;
+        }
+    }
+
+    outputBox.textContent = "";
+
+    try {
+        let outputBuffer = [];
+
+        await pyodide.runPythonAsync(`
+import sys
+import builtins
+from io import StringIO
+
+_output_buffer = []
+
+def _custom_print(*args, sep=' ', end='\\n', **kwargs):
+    text = sep.join(str(arg) for arg in args) + end
+    _output_buffer.append(text)
+
+_original_print = builtins.print
+_original_input = builtins.input
+
+builtins.print = _custom_print
+`);
+
+        const inputFunc = async (prompt) => {
+            outputBuffer.push(prompt);
+            outputBox.textContent = outputBuffer.join("");
+            return await customPythonInput(prompt);
+        };
+
+        pyodide.globals.set("_user_code", code);
+
+        let result = null;
+        const inputValues = [];
+
+        while (true) {
+            pyodide.globals.set("_input_values", inputValues);
+
+            const userCodeWrapped = `
+try:
+    _output_buffer.clear()
+    _input_index = 0
+    _input_values_local = list(_input_values)
+
+    def _sync_input_wrapper(prompt=''):
+        import json
+        global _input_index
+        if _input_index < len(_input_values_local):
+            value = _input_values_local[_input_index]
+            _input_index += 1
+            _output_buffer.append(prompt)
+            _output_buffer.append(str(value) + '\\n')
+            return value
+        _output_buffer.append(json.dumps({'__input_request__': prompt}))
+        raise EOFError('__PY_INPUT_REQUEST__')
+
+    builtins.input = _sync_input_wrapper
+    exec(_user_code, globals())
+except EOFError as e:
+    if str(e) != '__PY_INPUT_REQUEST__':
+        raise
+except Exception as e:
+    import traceback
+    _custom_print(traceback.format_exc())
+
+import json
+result = []
+for item in _output_buffer:
+    try:
+        parsed = json.loads(item)
+        if isinstance(parsed, dict) and '__input_request__' in parsed:
+            result.append(parsed)
+        else:
+            result.append(item)
+    except:
+        result.append(item)
+result
+`;
+
+            result = await pyodide.runPythonAsync(userCodeWrapped);
+            if (result && typeof result.toJs === "function") {
+                const converted = result.toJs({ dict_converter: Object.fromEntries });
+                if (typeof result.destroy === "function") {
+                    result.destroy();
+                }
+                result = converted;
+            }
+
+            const request = Array.isArray(result)
+                ? result.find(item => typeof item === "object" && item.__input_request__)
+                : null;
+
+            if (!request) {
+                break;
+            }
+
+            const inputValue = await inputFunc(request.__input_request__);
+            inputValues.push(inputValue);
+        }
+
+        result = Array.isArray(result) ? result.join("") : result;
+
+        if (result && result.trim()) {
+            outputBox.textContent = result;
+        } else {
+            outputBox.textContent = "(Nincs kimenet)";
+        }
+
+        logEvent("Python code executed successfully");
+
+        await pyodide.runPythonAsync(`
+builtins.print = _original_print
+builtins.input = _original_input
+`);
+    } catch (err) {
+        outputBox.classList.add("error");
+        outputBox.textContent = "Hiba:\n" + err.toString();
+        logEvent("Python code execution failed", { error: err.toString() });
+
+        try {
+            await pyodide.runPythonAsync(`
+builtins.print = _original_print
+builtins.input = _original_input
+`);
+        } catch (e) {
+            // Ignore cleanup errors
+        }
+    }
+}
+
+// Terminal emulator support with xterm.js and multi-input handling.
+var term = null;
+var fitAddon = null;
+var terminalReady = false;
+var terminalInputResolver = null;
+var terminalInputBuffer = "";
+
+function initTerminal() {
+    if (terminalReady) return;
+    var terminalElement = document.getElementById("terminal");
+    if (!terminalElement || typeof Terminal === "undefined") {
+        return;
+    }
+
+    term = new Terminal({
+        cursorBlink: true,
+        fontFamily: "'Fira Mono', 'Consolas', 'Menlo', monospace",
+        fontSize: 14,
+        theme: {
+            background: "#1e1e1e",
+            foreground: "#e6e6e6"
+        }
+    });
+    fitAddon = new FitAddon.FitAddon();
+    term.loadAddon(fitAddon);
+    term.open(terminalElement);
+    fitAddon.fit();
+
+    window.addEventListener("resize", function () {
+        if (fitAddon) {
+            fitAddon.fit();
+        }
+    });
+
+    term.onKey(function (e) {
+        if (!terminalInputResolver) {
+            return;
+        }
+
+        if (e.domEvent.key === "Enter") {
+            term.write("\r\n");
+            var value = terminalInputBuffer;
+            terminalInputBuffer = "";
+            var resolver = terminalInputResolver;
+            terminalInputResolver = null;
+            resolver(value);
+            return;
+        }
+
+        if (e.domEvent.key === "Backspace") {
+            if (terminalInputBuffer.length > 0) {
+                terminalInputBuffer = terminalInputBuffer.slice(0, -1);
+                term.write("\b \b");
+            }
+            return;
+        }
+
+        if (e.domEvent.key.length === 1 && !e.domEvent.ctrlKey && !e.domEvent.metaKey) {
+            terminalInputBuffer += e.key;
+            term.write(e.key);
+        }
+    });
+
+    terminalReady = true;
+}
+
+function terminalReset() {
+    if (term) {
+        term.reset();
+    }
+}
+
+function terminalWrite(text) {
+    if (!term || !text) return;
+    term.write(text.replace(/\n/g, "\r\n"));
+}
+
+function requestTerminalInput() {
+    return new Promise(function (resolve) {
+        terminalInputBuffer = "";
+        terminalInputResolver = resolve;
+        if (term) {
+            term.focus();
+        }
+    });
+}
+
+async function runPythonCode() {
+    var code = codeEditor.getValue();
+    var outputBox = document.getElementById("output-box");
+    var outputContainer = document.getElementById("output-container");
+    var terminalContainer = document.getElementById("terminal-container");
+
+    initTerminal();
+    var useTerminal = terminalReady;
+
+    if (!code.trim()) {
+        if (useTerminal) {
+            terminalReset();
+            terminalWrite("Nincs futtatható kód!\nÍrj be Python kódot, majd nyomd meg a Futtatás gombot.");
+        } else {
+            outputContainer.style.display = "block";
+            outputBox.classList.remove("error");
+            outputBox.textContent = "Nincs futtatható kód!\nÍrj be Python kódot, majd nyomd meg a Futtatás gombot.";
+        }
+        return;
+    }
+
+    if (terminalContainer) {
+        terminalContainer.style.display = "block";
+    }
+
+    if (!pyodideReady) {
+        if (useTerminal) {
+            terminalReset();
+            terminalWrite("Python környezet betöltése...\n");
+        } else {
+            outputContainer.style.display = "block";
+            outputBox.textContent = "Python környezet betöltése...\n";
+        }
+        await initPyodide();
+        if (!pyodideReady) {
+            if (useTerminal) {
+                terminalReset();
+                terminalWrite("Hiba: A Python környezet nem tölthető be!");
+            } else {
+                outputBox.classList.add("error");
+                outputBox.textContent = "Hiba: A Python környezet nem tölthető be!";
+            }
+            return;
+        }
+    }
+
+    if (useTerminal) {
+        terminalReset();
+    } else {
+        outputContainer.style.display = "block";
+        outputBox.textContent = "";
+        outputBox.classList.remove("error");
+    }
+
+    try {
+        await pyodide.runPythonAsync("\nimport sys\nimport builtins\nfrom io import StringIO\n\n_output_buffer = []\n\ndef _custom_print(*args, sep=' ', end='\\n', **kwargs):\n    text = sep.join(str(arg) for arg in args) + end\n    _output_buffer.append(text)\n\n_original_print = builtins.print\n_original_input = builtins.input\n\nbuiltins.print = _custom_print\n");
+
+        pyodide.globals.set("_user_code", code);
+
+        var result = null;
+        var inputValues = [];
+        var transcript = "";
+
+        while (true) {
+            pyodide.globals.set("_input_values", inputValues);
+
+            var userCodeWrapped = "\ntry:\n    _output_buffer.clear()\n    _input_index = 0\n    _input_values_local = list(_input_values)\n\n    def _sync_input_wrapper(prompt=''):\n        import json\n        global _input_index\n        if _input_index < len(_input_values_local):\n            value = _input_values_local[_input_index]\n            _input_index += 1\n            _output_buffer.append(json.dumps({'__input_echo__': prompt, 'value': value}))\n            return value\n        _output_buffer.append(json.dumps({'__input_request__': prompt}))\n        raise EOFError('__PY_INPUT_REQUEST__')\n\n    builtins.input = _sync_input_wrapper\n    exec(_user_code, globals())\nexcept EOFError as e:\n    if str(e) != '__PY_INPUT_REQUEST__':\n        raise\nexcept Exception as e:\n    import traceback\n    _custom_print(traceback.format_exc())\n\nimport json\nresult = []\nfor item in _output_buffer:\n    try:\n        parsed = json.loads(item)\n        result.append(parsed)\n    except:\n        result.append(item)\nresult\n";
+
+            result = await pyodide.runPythonAsync(userCodeWrapped);
+            if (result && typeof result.toJs === "function") {
+                var converted = result.toJs({ dict_converter: Object.fromEntries });
+                if (typeof result.destroy === "function") {
+                    result.destroy();
+                }
+                result = converted;
+            }
+
+            var pendingPrompt = null;
+            transcript = "";
+            if (Array.isArray(result)) {
+                for (var i = 0; i < result.length; i++) {
+                    var item = result[i];
+                    if (item && typeof item === "object") {
+                        if (item.__input_echo__ !== undefined) {
+                            transcript += String(item.__input_echo__) + String(item.value === undefined ? "" : item.value) + "\n";
+                            continue;
+                        }
+                        if (item.__input_request__ !== undefined) {
+                            transcript += String(item.__input_request__);
+                            pendingPrompt = item.__input_request__;
+                            break;
+                        }
+                    }
+                    transcript += String(item);
+                }
+            } else if (result) {
+                transcript = String(result);
+            }
+
+            if (useTerminal) {
+                terminalReset();
+                terminalWrite(transcript);
+            } else {
+                outputBox.textContent = transcript || "(Nincs kimenet)";
+            }
+
+            if (!pendingPrompt) {
+                break;
+            }
+
+            var inputValue = useTerminal ? await requestTerminalInput() : await customPythonInput(pendingPrompt);
+            inputValues.push(inputValue);
+        }
+
+        if (!transcript.trim()) {
+            if (useTerminal) {
+                terminalWrite("(Nincs kimenet)");
+            } else {
+                outputBox.textContent = "(Nincs kimenet)";
+            }
+        }
+
+        logEvent("Python code executed successfully");
+
+        await pyodide.runPythonAsync("\nbuiltins.print = _original_print\nbuiltins.input = _original_input\n");
+    } catch (err) {
+        if (useTerminal) {
+            terminalReset();
+            terminalWrite("Hiba:\n" + err.toString());
+        } else {
+            outputBox.classList.add("error");
+            outputBox.textContent = "Hiba:\n" + err.toString();
+        }
+        logEvent("Python code execution failed", { error: err.toString() });
+
+        try {
+            await pyodide.runPythonAsync("\nbuiltins.print = _original_print\nbuiltins.input = _original_input\n");
+        } catch (e) {
+            // Ignore cleanup errors
+        }
+    }
+}
