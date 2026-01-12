@@ -193,8 +193,12 @@ Idős vagy.
 
 10. feladat
 
-Írj programot, amelyben bekéred a felhasználó testsúlyát kilogramm-ban és magasságát méterben, majd számítsd ki és írd ki a BMI értékét két tizedesjegyre kerekítve!
+Írj programot, amelyben bekéred a felhasználó testsúlyát kilogramm-ban és magasságát méterben, majd számítsd ki és írd ki a BMI értékét két tizedesjegyre kerekítve! A program írjon rövid választ a felhasználónak, hogy melyik kategóriába tartozik: Sovány / Normál testsúlyú / Túlsúlyos / Elhízott vagy! szöveggel.
 A BMI képlete: testsúly / (magasság * magasság)
+18.5-tól kisebb: sovány
+18.5 - 24.99-ig: normál testsúlyú
+25 - 29.99-ig: túlsúlyos
+30 fölött: elhízott
 
 Minta kód:
 
@@ -202,8 +206,10 @@ Minta kód:
 Add meg a testsúlyod kg-ban! 75
 Add meg a magasságod méterben! 1.8
 A BMI értéked: 23.15
+Normál testsúlyú vagy!
 
 ```
+
 
 11. feladat
 
@@ -250,5 +256,6 @@ A víz halmazállapota: folyékony
 
 Add meg a hőmérsékletet Celsius fokban! 150
 A víz halmazállapota: légnemű
+
 
 ```
