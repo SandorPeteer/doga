@@ -20,9 +20,8 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.2/codemirror.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.2/mode/python/python.min.js"></script>
 
-    <!-- Skulpt for Python execution -->
-    <script src="https://skulpt.org/js/skulpt.min.js"></script>
-    <script src="https://skulpt.org/js/skulpt-stdlib.js"></script>
+    <!-- Pyodide for Python execution (Python 3.x) -->
+    <script src="https://cdn.jsdelivr.net/pyodide/v0.24.1/full/pyodide.js"></script>
 
     <style>
         * {
@@ -428,6 +427,72 @@
             align-items: center;
         }
 
+        /* Python Input Modal */
+        .python-input-modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.8);
+            z-index: 10001;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .python-input-content {
+            background: white;
+            padding: 2rem;
+            border-radius: 15px;
+            max-width: 500px;
+            width: 90%;
+        }
+
+        .python-input-content h3 {
+            color: #333;
+            margin-bottom: 1rem;
+            font-size: 1.2rem;
+        }
+
+        .python-input-content input {
+            width: 100%;
+            padding: 0.8rem;
+            border: 2px solid #ddd;
+            border-radius: 8px;
+            font-size: 1rem;
+            margin-bottom: 1rem;
+        }
+
+        .python-input-content input:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        .python-input-buttons {
+            display: flex;
+            gap: 1rem;
+            justify-content: flex-end;
+        }
+
+        .python-input-btn {
+            padding: 0.6rem 1.2rem;
+            border: none;
+            border-radius: 8px;
+            font-size: 1rem;
+            cursor: pointer;
+            font-weight: 600;
+        }
+
+        .python-input-btn.submit {
+            background: #667eea;
+            color: white;
+        }
+
+        .python-input-btn.submit:hover {
+            background: #5568d3;
+        }
+
         .modal-content {
             background: white;
             padding: 2rem;
@@ -490,8 +555,8 @@
                 </p>
                 <p><strong>Időkeret:</strong></p>
                 <ul>
-                    <li>Feladatonként 8 perc áll rendelkezésedre</li>
-                    <li>Összesen 24 perc a teljes tesztre</li>
+                    <li>Feladatonként 10-15 perc áll rendelkezésedre</li>
+                    <li>Összesen 30-45 perc jut a teljes tesztre</li>
                     <li>Szabadon gazdálkodhatsz az időddel a 3 feladat között</li>
                 </ul>
                 <p><strong>Funkciók:</strong></p>
@@ -588,6 +653,17 @@
         <div>
             <h2>⚠️ Fullscreen mód szükséges!</h2>
             <p style="font-size: 1.2rem; margin-top: 1rem;">A teszt folytatásához maradj fullscreen módban.</p>
+        </div>
+    </div>
+
+    <!-- Python Input Modal -->
+    <div class="python-input-modal" id="python-input-modal">
+        <div class="python-input-content">
+            <h3 id="python-input-prompt">Input</h3>
+            <input type="text" id="python-input-field" autocomplete="off">
+            <div class="python-input-buttons">
+                <button class="python-input-btn submit" id="python-input-submit">OK</button>
+            </div>
         </div>
     </div>
 
