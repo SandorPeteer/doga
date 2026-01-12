@@ -1,8 +1,8 @@
 # Felmérők és tesztek online:
 
-[Python dolgozat](sandorpeteer.github.io/doga/python/)   
-[WEB dolgozat](sandorpeteer.github.io/doga/web/)   
-[C## dolgozat](sandorpeteer.github.io/doga/cs/)   
+[Python dolgozat](https://sandorpeteer.github.io/doga/python/)   
+[WEB dolgozat](https://sandorpeteer.github.io/doga/web/)   
+[C## dolgozat](https://sandorpeteer.github.io/doga/cs/)   
 
 ---   
 
