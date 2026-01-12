@@ -939,3 +939,45 @@ async function runPythonCode() {
         }
     }
 }
+
+// Additional focus/blur enforcement for multi-monitor switching.
+(function () {
+    var focusLossTimeout = null;
+    var focusCheckInterval = null;
+
+    function handleWindowBlur() {
+        if (!quizSection.classList.contains("hidden") && testStartTime) {
+            focusLossTimeout = setTimeout(function () {
+                if (!document.hasFocus()) {
+                    logEvent("Window blurred - test terminated");
+                    alert("Elhagytad az ablakot! A teszt véget ért.");
+                    forceSubmitTest();
+                }
+            }, 500);
+        }
+    }
+
+    function handleWindowFocus() {
+        if (focusLossTimeout) {
+            clearTimeout(focusLossTimeout);
+            focusLossTimeout = null;
+        }
+    }
+
+    function startFocusCheck() {
+        if (focusCheckInterval) return;
+        focusCheckInterval = setInterval(function () {
+            if (!quizSection.classList.contains("hidden") && testStartTime) {
+                if (!document.hasFocus()) {
+                    logEvent("Focus check failed - test terminated");
+                    alert("Elhagytad az ablakot! A teszt véget ért.");
+                    forceSubmitTest();
+                }
+            }
+        }, 1000);
+    }
+
+    window.addEventListener("blur", handleWindowBlur);
+    window.addEventListener("focus", handleWindowFocus);
+    startFocusCheck();
+})();
