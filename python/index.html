@@ -626,6 +626,8 @@
                 <div class="timer" id="task-timer">Feladat idő: 8:00</div>
             </div>
 
+            <div class="task-navigation" id="task-navigation"></div>
+
             <div class="task-info">
                 <div class="task-number" id="task-number"></div>
                 <div class="task-description" id="task-description"></div>
@@ -648,11 +650,9 @@
             </div>
 
             <div class="button-group">
-                <button class="btn btn-secondary" id="skip-btn">Feladat átugrása</button>
-                <button class="btn btn-success" id="submit-btn">Teszt beadása</button>
+                <button class="btn btn-secondary" id="skip-btn">Következő feladat</button>
+                <button class="btn btn-success" id="submit-btn">⚠️ TESZT BEADÁSA (VÉGLEGES!)</button>
             </div>
-
-            <div class="task-navigation" id="task-navigation"></div>
         </div>
 
         <!-- End Section -->
@@ -661,6 +661,15 @@
             <p class="info-text">Köszönjük, hogy kitöltötted a tesztet! A válaszaidat elküldtük a tanárnak.</p>
             <p class="info-text" id="final-time"></p>
         </div>
+    </div>
+
+    <!-- Debug Panel -->
+    <div id="debug-panel" style="position: fixed; bottom: 10px; left: 10px; background: rgba(0,0,0,0.9); color: #0f0; padding: 15px; border-radius: 8px; font-family: monospace; font-size: 12px; max-width: 500px; max-height: 300px; overflow-y: auto; z-index: 10000; display: none;">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; border-bottom: 1px solid #0f0; padding-bottom: 5px;">
+            <strong style="color: #0ff;">🔍 DEBUG LOG</strong>
+            <button onclick="document.getElementById('debug-panel').style.display='none'" style="background: #f00; color: #fff; border: none; padding: 2px 8px; cursor: pointer; border-radius: 3px;">X</button>
+        </div>
+        <div id="debug-content"></div>
     </div>
 
     <!-- Confirmation Modal -->
