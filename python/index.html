@@ -703,6 +703,21 @@
         </div>
     </div>
 
+    <script>
+        // URL paraméterből mode beállítása
+        (function() {
+            const urlParams = new URLSearchParams(window.location.search);
+            const mode = urlParams.get('mode');
+            if (mode === 'practice' || mode === 'live') {
+                localStorage.setItem('testMode', mode);
+                console.log('Test mode set to:', mode);
+            } else if (!localStorage.getItem('testMode')) {
+                // Ha nincs mode paraméter és nincs localStorage-ban sem, akkor practice
+                localStorage.setItem('testMode', 'practice');
+                console.log('Test mode defaulted to: practice');
+            }
+        })();
+    </script>
     <script src="python_teszt.obfuscated.js"></script>
 </body>
 
