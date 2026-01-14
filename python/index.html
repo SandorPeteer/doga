@@ -364,19 +364,17 @@
 
         .terminal-container {
             margin-top: 1rem;
-        }
-
-        .terminal-label {
-            font-weight: 600;
-            color: #555;
-            margin-bottom: 0.5rem;
+            background: #0c0c0c;
+            border: 1px solid #2b2b2b;
+            border-radius: 6px;
+            padding: 6px;
         }
 
         #terminal {
-            background: #1e1e1e;
-            border: 2px solid #444;
-            border-radius: 8px;
-            height: 220px;
+            background: #0c0c0c;
+            border: none;
+            border-radius: 4px;
+            height: 240px;
             padding: 6px;
         }
 
@@ -418,7 +416,6 @@
 
         /* End Section */
         #end-section {
-            display: none;
             flex-direction: column;
             gap: 2rem;
             text-align: center;
@@ -568,6 +565,11 @@
 
         <!-- Start Section -->
         <div id="start-section">
+            <!-- Test Mode Badge -->
+            <div id="test-mode-badge" style="background: #f0f0f0; padding: 1rem; border-radius: 10px; text-align: center; margin-bottom: 1.5rem; font-weight: 600; font-size: 1.2rem; display: none;">
+                <span id="test-mode-text"></span>
+            </div>
+
             <!-- Test Information -->
             <div class="test-info">
                 <h2>📋 A tesztről</h2>
@@ -639,32 +641,26 @@
 
             <button class="run-code-btn" id="run-code-btn">▶ Kód futtatása</button>
 
-            <div class="output-container" id="output-container">
-                <div class="output-label">💻 Kimenet:</div>
-                <div class="output-box" id="output-box"></div>
-            </div>
-
             <div class="terminal-container" id="terminal-container">
-                <div class="terminal-label">🖥️ Terminál:</div>
                 <div id="terminal"></div>
             </div>
 
             <div class="button-group">
-                <button class="btn btn-secondary" id="skip-btn">Következő feladat</button>
+                <button class="btn btn-secondary" id="skip-btn">SKIP</button>
                 <button class="btn btn-success" id="submit-btn">⚠️ TESZT BEADÁSA (VÉGLEGES!)</button>
             </div>
         </div>
 
         <!-- End Section -->
         <div id="end-section" class="hidden">
-            <h2>✅ Teszt befejezve!</h2>
-            <p class="info-text">Köszönjük, hogy kitöltötted a tesztet! A válaszaidat elküldtük a tanárnak.</p>
+            <h2 id="end-title">✅ Teszt befejezve!</h2>
+            <p class="info-text" id="end-message">Köszönjük, hogy kitöltötted a tesztet! A válaszaidat elküldtük a tanárnak.</p>
             <p class="info-text" id="final-time"></p>
         </div>
     </div>
 
     <!-- Debug Panel -->
-    <div id="debug-panel" style="position: fixed; bottom: 10px; left: 10px; background: rgba(0,0,0,0.9); color: #0f0; padding: 15px; border-radius: 8px; font-family: monospace; font-size: 12px; max-width: 500px; max-height: 300px; overflow-y: auto; z-index: 10000; display: none;">
+    <div id="debug-panel" style="position: fixed; bottom: 10px; left: 10px; background: rgba(0,0,0,0.9); color: #0f0; padding: 15px; border-radius: 8px; font-family: monospace; font-size: 12px; max-width: 500px; max-height: 300px; overflow-y: auto; z-index: 10000; display: block;">
         <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; border-bottom: 1px solid #0f0; padding-bottom: 5px;">
             <strong style="color: #0ff;">🔍 DEBUG LOG</strong>
             <button onclick="document.getElementById('debug-panel').style.display='none'" style="background: #f00; color: #fff; border: none; padding: 2px 8px; cursor: pointer; border-radius: 3px;">X</button>
@@ -692,32 +688,6 @@
         </div>
     </div>
 
-    <!-- Python Input Modal -->
-    <div class="python-input-modal" id="python-input-modal">
-        <div class="python-input-content">
-            <h3 id="python-input-prompt">Input</h3>
-            <input type="text" id="python-input-field" autocomplete="off">
-            <div class="python-input-buttons">
-                <button class="python-input-btn submit" id="python-input-submit">OK</button>
-            </div>
-        </div>
-    </div>
-
-    <script>
-        // URL paraméterből mode beállítása
-        (function() {
-            const urlParams = new URLSearchParams(window.location.search);
-            const mode = urlParams.get('mode');
-            if (mode === 'practice' || mode === 'live') {
-                localStorage.setItem('testMode', mode);
-                console.log('Test mode set to:', mode);
-            } else if (!localStorage.getItem('testMode')) {
-                // Ha nincs mode paraméter és nincs localStorage-ban sem, akkor practice
-                localStorage.setItem('testMode', 'practice');
-                console.log('Test mode defaulted to: practice');
-            }
-        })();
-    </script>
     <script src="python_teszt.obfuscated.js"></script>
 </body>
 

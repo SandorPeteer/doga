@@ -209,6 +209,7 @@
             width: 100%;
             border-collapse: collapse;
             margin-top: 20px;
+            table-layout: fixed;
         }
 
         .submissions-table th,
@@ -216,6 +217,9 @@
             padding: 12px;
             text-align: left;
             border-bottom: 1px solid #ddd;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
         }
 
         .submissions-table th {
@@ -228,10 +232,55 @@
             background: #f8f9fa;
         }
 
+        .submissions-table th:nth-child(1),
+        .submissions-table td:nth-child(1) {
+            width: 60px;
+        }
+
+        .submissions-table th:nth-child(2),
+        .submissions-table td:nth-child(2) {
+            width: 170px;
+        }
+
+        .submissions-table th:nth-child(6),
+        .submissions-table td:nth-child(6) {
+            width: 90px;
+        }
+
+        .submissions-table th:nth-child(7),
+        .submissions-table td:nth-child(7) {
+            width: 120px;
+        }
+
+        .submissions-table th:nth-child(8),
+        .submissions-table td:nth-child(8) {
+            width: 320px;
+        }
+
+        .submissions-table th:nth-child(9),
+        .submissions-table td:nth-child(9) {
+            width: 100px;
+        }
+
         .loading {
             text-align: center;
             padding: 20px;
             color: #666;
+        }
+
+        .submissions-panel {
+            position: relative;
+        }
+
+        #submissions-loading {
+            position: absolute;
+            top: 16px;
+            right: 20px;
+            padding: 6px 10px;
+            background: #fff3cd;
+            border: 1px solid #ffc107;
+            border-radius: 6px;
+            z-index: 5;
         }
 
         .error {
@@ -240,6 +289,42 @@
             padding: 15px;
             border-radius: 6px;
             margin-bottom: 20px;
+        }
+
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.6);
+            z-index: 2000;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .modal-content {
+            background: #fff;
+            width: 90%;
+            max-width: 900px;
+            max-height: 85vh;
+            overflow-y: auto;
+            border-radius: 10px;
+            padding: 20px;
+            position: relative;
+        }
+
+        .modal-close {
+            position: absolute;
+            top: 12px;
+            right: 12px;
+            background: #f00;
+            color: #fff;
+            border: none;
+            padding: 4px 10px;
+            cursor: pointer;
+            border-radius: 4px;
         }
 
         .success {
@@ -409,7 +494,7 @@
         </div>
 
         <!-- Submissions -->
-        <div class="panel">
+        <div class="panel submissions-panel">
             <h2>📋 Legutóbbi Beadások</h2>
             <button class="btn-refresh" onclick="loadSubmissions()">🔄 Frissítés</button>
             <div id="submissions-loading" class="loading" style="display: none;">Betöltés...</div>
@@ -420,16 +505,27 @@
                         <th>Időpont</th>
                         <th>Név</th>
                         <th>Email</th>
+                        <th>Osztály</th>
                         <th>Időtartam</th>
                         <th>Feladatok</th>
+                        <th>Válaszok</th>
+                        <th>Státusz</th>
                     </tr>
                 </thead>
                 <tbody id="submissions-tbody">
                     <tr>
-                        <td colspan="6" class="loading">Nincs adat</td>
+                        <td colspan="9" class="loading">Nincs adat</td>
                     </tr>
                 </tbody>
             </table>
+        </div>
+
+        <div class="modal" id="submission-modal">
+            <div class="modal-content">
+                <button class="modal-close" id="submission-modal-close">X</button>
+                <h2>🧾 Részletek</h2>
+                <div id="submission-details-content"></div>
+            </div>
         </div>
     </div>
     </div>
@@ -603,7 +699,7 @@
                 tbody.innerHTML = '';
 
                 if (!data.submissions || data.submissions.length === 0) {
-                    tbody.innerHTML = '<tr><td colspan="6" class="loading">Még nincs beadás</td></tr>';
+                    tbody.innerHTML = '<tr><td colspan="9" class="loading">Még nincs beadás</td></tr>';
                 } else {
                     // Calculate stats
                     const total = data.submissions.length;
@@ -622,14 +718,22 @@
                         const date = new Date(sub.timestamp);
                         const duration = Math.round(sub.test_duration / 60);
 
+                        const answersPreview = formatAnswersPreview(sub);
                         row.innerHTML = `
                             <td>${sub.submission_id}</td>
                             <td>${date.toLocaleString('hu-HU')}</td>
                             <td>${sub.student_name}</td>
                             <td>${sub.student_email}</td>
+                            <td>${sub.student_class || ''}</td>
                             <td>${duration} perc</td>
                             <td>${sub.selected_tasks}</td>
+                            <td>${answersPreview}</td>
+                            <td>${sub.status || ''}</td>
                         `;
+                        row.style.cursor = 'pointer';
+                        row.addEventListener('click', () => {
+                            loadSubmissionDetails(sub.submission_id);
+                        });
                         tbody.appendChild(row);
                     });
                 }
@@ -692,6 +796,94 @@
                 document.getElementById('grading-progress').style.display = 'none';
                 showAIStatus('error', 'Hiba az AI javítás során: ' + error.message);
             }
+        }
+
+        async function loadSubmissionDetails(submissionId) {
+            if (!API_URL) return;
+
+            try {
+                const response = await fetch(`${API_URL}?action=getSubmission&id=${encodeURIComponent(submissionId)}`);
+                const data = await response.json();
+
+                if (data.error) {
+                    throw new Error(data.error);
+                }
+
+                const content = document.getElementById('submission-details-content');
+                const tasksHtml = (data.tasks || []).map((t, idx) => {
+                    const taskNum = t.task_number !== undefined && t.task_number !== '' ? t.task_number : '-';
+                    const timeSpent = t.time_spent !== undefined && t.time_spent !== '' ? t.time_spent : 0;
+                    const answer = t.answer ? String(t.answer) : '';
+
+                    return `
+                        <div style="margin-top: 12px;">
+                            <div><strong>${idx + 1}. feladat:</strong> ${taskNum} (${timeSpent} mp)</div>
+                            <div style="margin-top: 6px;">
+                                <textarea readonly style="width: 100%; min-height: 120px; font-family: monospace; white-space: pre; padding: 8px; border-radius: 6px; border: 1px solid #ddd;">${answer}</textarea>
+                            </div>
+                        </div>
+                    `;
+                }).join('');
+
+                const duration = Math.round((data.test_duration || 0) / 60);
+
+                content.innerHTML = `
+                    <div><strong>Név:</strong> ${data.student_name || ''}</div>
+                    <div><strong>Időtartam:</strong> ${duration} perc</div>
+                    ${tasksHtml}
+                `;
+
+                openSubmissionModal();
+            } catch (error) {
+                console.error('Hiba a submission részleteinek betöltésekor:', error);
+            }
+        }
+
+        function openSubmissionModal() {
+            const modal = document.getElementById('submission-modal');
+            modal.style.display = 'flex';
+        }
+
+        function closeSubmissionModal() {
+            const modal = document.getElementById('submission-modal');
+            modal.style.display = 'none';
+        }
+
+        document.getElementById('submission-modal-close').addEventListener('click', closeSubmissionModal);
+        document.getElementById('submission-modal').addEventListener('click', (event) => {
+            if (event.target.id === 'submission-modal') {
+                closeSubmissionModal();
+            }
+        });
+
+        function formatAnswersPreview(sub) {
+            const parts = [];
+            const items = [
+                { number: sub.task1_number, answer: sub.task1_answer },
+                { number: sub.task2_number, answer: sub.task2_answer },
+                { number: sub.task3_number, answer: sub.task3_answer }
+            ];
+
+            items.forEach((item) => {
+                if (item.number === '' || item.number === null || item.number === undefined) {
+                    return;
+                }
+                const raw = item.answer ? String(item.answer) : '';
+                const cleaned = raw.replace(/\s+/g, ' ').trim();
+                const preview = cleaned.length > 40 ? cleaned.slice(0, 37) + '...' : cleaned;
+                parts.push(`${item.number}: ${preview}`);
+            });
+
+            return escapeHtml(parts.join(' | '));
+        }
+
+        function escapeHtml(value) {
+            return value
+                .replace(/&/g, '&amp;')
+                .replace(/</g, '&lt;')
+                .replace(/>/g, '&gt;')
+                .replace(/"/g, '&quot;')
+                .replace(/'/g, '&#039;');
         }
 
         // Direct Gemini API call from browser
