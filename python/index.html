@@ -258,6 +258,39 @@
             animation: pulse 1s infinite;
         }
 
+        .task-timer-float {
+            position: fixed;
+            top: 12px;
+            right: 12px;
+            background: #111;
+            color: #fff;
+            padding: 10px 14px;
+            border-radius: 8px;
+            font-weight: 700;
+            font-size: 0.95rem;
+            letter-spacing: 0.3px;
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.35);
+            z-index: 9999;
+            display: none;
+        }
+
+        .task-timer-float.warning {
+            background: #c92a2a;
+        }
+
+        .version-badge {
+            position: fixed;
+            right: 10px;
+            bottom: 8px;
+            font-size: 11px;
+            color: #999;
+            background: rgba(0, 0, 0, 0.4);
+            padding: 2px 6px;
+            border-radius: 6px;
+            z-index: 9999;
+            pointer-events: none;
+        }
+
         @keyframes pulse {
             0%, 100% { opacity: 1; }
             50% { opacity: 0.5; }
@@ -276,6 +309,11 @@
             color: #667eea;
             font-size: 1.2rem;
             margin-bottom: 0.5rem;
+        }
+
+        .cm-specialchar {
+            color: #ff6b6b;
+            font-weight: 700;
         }
 
         .task-description {
@@ -687,6 +725,9 @@
             <p style="font-size: 1.2rem; margin-top: 1rem;">A teszt folytatásához maradj fullscreen módban.</p>
         </div>
     </div>
+
+    <div id="task-timer-float" class="task-timer-float">Feladat idő: 0:00</div>
+    <div class="version-badge">v1.21</div>
 
     <script src="python_teszt.obfuscated.js"></script>
 </body>

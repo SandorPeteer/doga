@@ -210,6 +210,7 @@
             border-collapse: collapse;
             margin-top: 20px;
             table-layout: fixed;
+            min-width: 840px;
         }
 
         .submissions-table th,
@@ -239,7 +240,12 @@
 
         .submissions-table th:nth-child(2),
         .submissions-table td:nth-child(2) {
-            width: 170px;
+            width: 210px;
+        }
+
+        .submissions-table th:nth-child(5),
+        .submissions-table td:nth-child(5) {
+            width: 70px;
         }
 
         .submissions-table th:nth-child(6),
@@ -254,12 +260,11 @@
 
         .submissions-table th:nth-child(8),
         .submissions-table td:nth-child(8) {
-            width: 320px;
+            width: 100px;
         }
 
-        .submissions-table th:nth-child(9),
-        .submissions-table td:nth-child(9) {
-            width: 100px;
+        .table-wrapper {
+            overflow-x: auto;
         }
 
         .loading {
@@ -498,26 +503,27 @@
             <h2>📋 Legutóbbi Beadások</h2>
             <button class="btn-refresh" onclick="loadSubmissions()">🔄 Frissítés</button>
             <div id="submissions-loading" class="loading" style="display: none;">Betöltés...</div>
-            <table class="submissions-table" id="submissions-table">
-                <thead>
-                    <tr>
-                        <th>ID</th>
-                        <th>Időpont</th>
-                        <th>Név</th>
-                        <th>Email</th>
-                        <th>Osztály</th>
-                        <th>Időtartam</th>
-                        <th>Feladatok</th>
-                        <th>Válaszok</th>
-                        <th>Státusz</th>
-                    </tr>
-                </thead>
-                <tbody id="submissions-tbody">
-                    <tr>
-                        <td colspan="9" class="loading">Nincs adat</td>
-                    </tr>
-                </tbody>
-            </table>
+            <div class="table-wrapper">
+                <table class="submissions-table" id="submissions-table">
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Időpont</th>
+                            <th>Név</th>
+                            <th>Email</th>
+                            <th>Osztály</th>
+                            <th>Időtartam</th>
+                            <th>Feladatok</th>
+                            <th>Státusz</th>
+                        </tr>
+                    </thead>
+                    <tbody id="submissions-tbody">
+                        <tr>
+                            <td colspan="8" class="loading">Nincs adat</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
         </div>
 
         <div class="modal" id="submission-modal">
@@ -699,7 +705,7 @@
                 tbody.innerHTML = '';
 
                 if (!data.submissions || data.submissions.length === 0) {
-                    tbody.innerHTML = '<tr><td colspan="9" class="loading">Még nincs beadás</td></tr>';
+                    tbody.innerHTML = '<tr><td colspan="8" class="loading">Még nincs beadás</td></tr>';
                 } else {
                     // Calculate stats
                     const total = data.submissions.length;
@@ -718,7 +724,6 @@
                         const date = new Date(sub.timestamp);
                         const duration = Math.round(sub.test_duration / 60);
 
-                        const answersPreview = formatAnswersPreview(sub);
                         row.innerHTML = `
                             <td>${sub.submission_id}</td>
                             <td>${date.toLocaleString('hu-HU')}</td>
@@ -727,7 +732,6 @@
                             <td>${sub.student_class || ''}</td>
                             <td>${duration} perc</td>
                             <td>${sub.selected_tasks}</td>
-                            <td>${answersPreview}</td>
                             <td>${sub.status || ''}</td>
                         `;
                         row.style.cursor = 'pointer';
@@ -855,27 +859,6 @@
                 closeSubmissionModal();
             }
         });
-
-        function formatAnswersPreview(sub) {
-            const parts = [];
-            const items = [
-                { number: sub.task1_number, answer: sub.task1_answer },
-                { number: sub.task2_number, answer: sub.task2_answer },
-                { number: sub.task3_number, answer: sub.task3_answer }
-            ];
-
-            items.forEach((item) => {
-                if (item.number === '' || item.number === null || item.number === undefined) {
-                    return;
-                }
-                const raw = item.answer ? String(item.answer) : '';
-                const cleaned = raw.replace(/\s+/g, ' ').trim();
-                const preview = cleaned.length > 40 ? cleaned.slice(0, 37) + '...' : cleaned;
-                parts.push(`${item.number}: ${preview}`);
-            });
-
-            return escapeHtml(parts.join(' | '));
-        }
 
         function escapeHtml(value) {
             return value
