@@ -501,7 +501,12 @@
         <!-- Submissions -->
         <div class="panel submissions-panel">
             <h2>📋 Legutóbbi Beadások</h2>
-            <button class="btn-refresh" onclick="loadSubmissions()">🔄 Frissítés</button>
+            <div style="display: flex; gap: 10px; align-items: center; flex-wrap: wrap;">
+                <button class="btn-refresh" onclick="loadSubmissions()">🔄 Frissítés</button>
+                <button class="btn-refresh" onclick="prevSubmissionsPage()">⬅️ Előző</button>
+                <button class="btn-refresh" onclick="nextSubmissionsPage()">Következő ➡️</button>
+                <span id="submissions-page-info" style="color: #666; font-size: 0.9rem;"></span>
+            </div>
             <div id="submissions-loading" class="loading" style="display: none;">Betöltés...</div>
             <div class="table-wrapper">
                 <table class="submissions-table" id="submissions-table">
@@ -688,6 +693,10 @@
         }
 
         // Load submissions
+        let submissionsCache = [];
+        let submissionsPage = 0;
+        const submissionsPageSize = 16;
+
         async function loadSubmissions() {
             if (!API_URL) return;
 
@@ -701,52 +710,83 @@
                     throw new Error(data.error);
                 }
 
-                const tbody = document.getElementById('submissions-tbody');
-                tbody.innerHTML = '';
-
-                if (!data.submissions || data.submissions.length === 0) {
-                    tbody.innerHTML = '<tr><td colspan="8" class="loading">Még nincs beadás</td></tr>';
-                } else {
-                    // Calculate stats
-                    const total = data.submissions.length;
-                    const today = new Date().toISOString().split('T')[0];
-                    const todayCount = data.submissions.filter(s => s.timestamp.startsWith(today)).length;
-                    const avgTime = Math.round(data.submissions.reduce((sum, s) => sum + (s.test_duration || 0), 0) / total / 60);
-
-                    document.getElementById('stat-total').textContent = total;
-                    document.getElementById('stat-today').textContent = todayCount;
-                    document.getElementById('stat-avg-time').textContent = avgTime;
-
-                    // Show submissions (latest 10)
-                    const latest = data.submissions.slice(-10).reverse();
-                    latest.forEach(sub => {
-                        const row = document.createElement('tr');
-                        const date = new Date(sub.timestamp);
-                        const duration = Math.round(sub.test_duration / 60);
-
-                        row.innerHTML = `
-                            <td>${sub.submission_id}</td>
-                            <td>${date.toLocaleString('hu-HU')}</td>
-                            <td>${sub.student_name}</td>
-                            <td>${sub.student_email}</td>
-                            <td>${sub.student_class || ''}</td>
-                            <td>${duration} perc</td>
-                            <td>${sub.selected_tasks}</td>
-                            <td>${sub.status || ''}</td>
-                        `;
-                        row.style.cursor = 'pointer';
-                        row.addEventListener('click', () => {
-                            loadSubmissionDetails(sub.submission_id);
-                        });
-                        tbody.appendChild(row);
-                    });
-                }
+                submissionsCache = data.submissions || [];
+                submissionsPage = 0;
+                renderSubmissionsPage();
 
                 document.getElementById('submissions-loading').style.display = 'none';
             } catch (error) {
                 document.getElementById('submissions-loading').style.display = 'none';
                 console.error('Hiba a beadások betöltésekor:', error);
             }
+        }
+
+        function renderSubmissionsPage() {
+            const tbody = document.getElementById('submissions-tbody');
+            tbody.innerHTML = '';
+
+            if (!submissionsCache || submissionsCache.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="8" class="loading">Még nincs beadás</td></tr>';
+                document.getElementById('submissions-page-info').textContent = '';
+                return;
+            }
+
+            // Calculate stats
+            const total = submissionsCache.length;
+            const today = new Date().toISOString().split('T')[0];
+            const todayCount = submissionsCache.filter(s => s.timestamp.startsWith(today)).length;
+            const avgTime = Math.round(submissionsCache.reduce((sum, s) => sum + (s.test_duration || 0), 0) / total / 60);
+
+            document.getElementById('stat-total').textContent = total;
+            document.getElementById('stat-today').textContent = todayCount;
+            document.getElementById('stat-avg-time').textContent = avgTime;
+
+            const start = submissionsPage * submissionsPageSize;
+            const end = Math.min(start + submissionsPageSize, submissionsCache.length);
+            const pageItems = submissionsCache.slice().reverse().slice(start, end);
+
+            pageItems.forEach(sub => {
+                const row = document.createElement('tr');
+                const date = new Date(sub.timestamp);
+                const duration = Math.round(sub.test_duration / 60);
+
+                row.innerHTML = `
+                    <td>${sub.submission_id}</td>
+                    <td>${date.toLocaleString('hu-HU')}</td>
+                    <td>${sub.student_name}</td>
+                    <td>${sub.student_email}</td>
+                    <td>${sub.student_class || ''}</td>
+                    <td>${duration} perc</td>
+                    <td>${sub.selected_tasks}</td>
+                    <td>${sub.status || ''}</td>
+                `;
+                row.style.cursor = 'pointer';
+                row.addEventListener('click', () => {
+                    loadSubmissionDetails(sub.submission_id);
+                });
+                tbody.appendChild(row);
+            });
+
+            const totalPages = Math.ceil(submissionsCache.length / submissionsPageSize);
+            document.getElementById('submissions-page-info').textContent =
+                `Oldal: ${submissionsPage + 1} / ${totalPages}`;
+        }
+
+        function nextSubmissionsPage() {
+            const totalPages = Math.ceil(submissionsCache.length / submissionsPageSize);
+            if (submissionsPage + 1 >= totalPages) {
+                return;
+            }
+            submissionsPage += 1;
+            renderSubmissionsPage();
+        }
+
+        function prevSubmissionsPage() {
+            if (submissionsPage === 0) {
+                return;
+            }
+            submissionsPage -= 1;
+            renderSubmissionsPage();
         }
 
         // AI Grading - BACKEND VERSION (Google Apps Script handles Gemini)
