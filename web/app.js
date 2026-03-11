@@ -649,7 +649,7 @@ humanoid: {
     {
       id: "css-nav-padding",
       label: "29. CSS: A navigáció listaelemének belső margójára vízszintesen 0, függőlegesen 15 képpontot állított",
-      check: (doc, html, css) => css && /nav\s+li\s*\{[^}]*padding\s*:\s*0\s*15px/i.test(css),
+      check: (doc, html, css) => css && /nav\s+li\s*\{[^}]*padding\s*:\s*15px\s*0/i.test(css),
       cssCheck: true,
     },
     {
